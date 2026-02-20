@@ -32,11 +32,11 @@ app.use('/api/pdf-summary', pdfSummaryRoutes);
 // ── Paper search: arXiv first, Semantic Scholar fallback ──────────────────────
 import { XMLParser } from 'fast-xml-parser';
 
-async function searchArxiv(query, fetchFn) {
+async function searchArxiv(query) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
     try {
-        const res = await fetchFn(
+        const res = await fetch(
             `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&max_results=10`,
             { signal: controller.signal, headers: { 'User-Agent': 'PaperCast/1.0' } }
         );
@@ -72,9 +72,9 @@ async function searchArxiv(query, fetchFn) {
     }
 }
 
-async function searchSemanticScholar(query, fetchFn) {
+async function searchSemanticScholar(query) {
     try {
-        const res = await fetchFn(
+        const res = await fetch(
             `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&fields=title,abstract,authors,year,openAccessPdf&limit=10`,
             { headers: { 'User-Agent': 'PaperCast/1.0' } }
         );
@@ -102,14 +102,13 @@ async function searchSemanticScholar(query, fetchFn) {
 app.get('/api/paper-search', async (req, res) => {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: 'Missing query' });
-    const { default: fetch } = await import('node-fetch');
     try {
         // 1. Try arXiv first
-        const arxivResults = await searchArxiv(query, fetch);
+        const arxivResults = await searchArxiv(query);
         if (arxivResults.length > 0) return res.json({ papers: arxivResults, source: 'arxiv' });
 
         // 2. Fallback to Semantic Scholar
-        const s2Results = await searchSemanticScholar(query, fetch);
+        const s2Results = await searchSemanticScholar(query);
         return res.json({ papers: s2Results, source: 'semantic_scholar' });
     } catch (err) {
         if (err.message === 'rate_limited') {
