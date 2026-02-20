@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: "https://paper-cast-alpha.vercel.app",
+    origin: ["https://paper-cast-alpha.vercel.app", "http://localhost:5173"],
     credentials: true
 }));
 app.use(express.json());
