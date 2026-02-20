@@ -5,6 +5,7 @@ import { StepIndicator } from '../components/StepIndicator';
 import { DialogueCard } from '../components/DialogueCard';
 import type { Dialogue } from '../components/DialogueCard';
 import { useAppContext } from '../context/AppContext';
+import { apiUrl } from '../lib/api';
 
 export function ScriptEditor() {
     const navigate = useNavigate();
@@ -57,7 +58,7 @@ export function ScriptEditor() {
     const handleGenerateAudio = async () => {
         setIsGeneratingAudio(true);
         try {
-            const response = await fetch('/api/audio', {
+            const response = await fetch(apiUrl('/api/audio'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -69,7 +70,7 @@ export function ScriptEditor() {
             if (!response.ok) throw new Error('Audio generation failed');
 
             const data = await response.json();
-            setAudioUrl(data.audioUrl);
+            setAudioUrl(apiUrl(data.audioUrl));
             navigate('/listen');
 
         } catch (error) {

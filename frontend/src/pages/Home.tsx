@@ -5,6 +5,7 @@ import { Layers, Users, Headphones, ChevronDown } from 'lucide-react';
 import { UploadZone } from '../components/UploadZone';
 import { PaperSearch } from '../components/PaperSearch';
 import { useAppContext } from '../context/AppContext';
+import { apiUrl } from '../lib/api';
 
 export function Home() {
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ export function Home() {
                 updateConfigField('style', 'debate'); // auto set debate mode
             }
 
-            const response = await fetch('/api/upload', {
+            const response = await fetch(apiUrl('/api/upload'), {
                 method: 'POST',
                 body: formData,
             });

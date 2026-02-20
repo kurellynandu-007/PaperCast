@@ -7,6 +7,7 @@ import { TransformationModal } from '../components/TransformationModal';
 import { useAppContext } from '../context/AppContext';
 import type { Transformation } from '../data/transformations';
 import { DEFAULT_TRANSFORMATIONS } from '../data/transformations';
+import { apiUrl } from '../lib/api';
 
 const ICONS: Record<string, string> = {
     standard_podcast: '🎙️',
@@ -35,7 +36,7 @@ export function Transformations() {
         setPlaygroundRunning(true);
         setPlaygroundResult('');
         try {
-            const res = await fetch('/api/generate/playground', {
+            const res = await fetch(apiUrl('/api/generate/playground'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ systemPrompt: playgroundOpen.systemPrompt, text: playgroundText }),

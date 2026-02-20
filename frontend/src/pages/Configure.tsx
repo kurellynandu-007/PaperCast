@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Zap, Clock, Users, BookOpen, User, GraduationCap, Microscope, ShieldAlert, Sparkles, Mic2 } from 'lucide-react';
 import { StepIndicator } from '../components/StepIndicator';
 import { useAppContext } from '../context/AppContext';
+import { apiUrl } from '../lib/api';
 
 export function Configure() {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ export function Configure() {
     const handleGenerate = async () => {
         setIsGenerating(true);
         try {
-            const response = await fetch('/api/generate', {
+            const response = await fetch(apiUrl('/api/generate'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

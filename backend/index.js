@@ -7,9 +7,26 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// CORS: allow local dev and production frontend URL
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:4173',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // allow requests with no origin (curl, server-to-server)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 import uploadRoutes from './routes/upload.js';
@@ -124,10 +141,14 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'PaperCast API is running' });
 });
 
-app.get('/', (req, res) => {
-    res.send('PaperCast Backend is running. Please access the web application at http://localhost:5173/');
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+app.get('/', (req, res) => {
+    res.send('PaperCast Backend is running.');
+});
+
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });

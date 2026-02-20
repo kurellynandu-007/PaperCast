@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Search, BookOpen, Users, Calendar, X, Loader2, CheckCircle, Download, AlertCircle } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 interface Paper {
     id: string;
@@ -41,7 +42,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
         setPapers([]);
         setImportedId(null);
         try {
-            const res = await fetch(`/api/paper-search?query=${encodeURIComponent(query.trim())}`);
+            const res = await fetch(apiUrl(`/api/paper-search?query=${encodeURIComponent(query.trim())}`));
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'Search failed');
@@ -63,7 +64,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
         if (!paper.pdfUrl) return;
         setImportingId(paper.id);
         try {
-            const res = await fetch(`/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`);
+            const res = await fetch(apiUrl(`/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`));
             if (!res.ok) throw new Error('Failed to fetch PDF');
             const blob = await res.blob();
             const fileName = `${paper.title.substring(0, 60).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
