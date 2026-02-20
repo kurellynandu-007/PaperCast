@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["ffmpeg", "python3"]
+
+[phases.install]
+cmds = ["npm install", "pip install edge-tts"]
+
+[start]
+cmd = "node index.js"
+
+[variables]
+NODE_VERSION = "20.19.0"
