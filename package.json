@@ -1,13 +1,11 @@
 {
     "name": "papercast",
     "version": "1.0.0",
-    "description": "Turn research papers into podcasts",
-    "main": "backend/index.js",
     "scripts": {
         "start": "node backend/index.js",
         "build": "cd frontend && npm install && npm run build"
     },
     "engines": {
-        "node": ">=18.0.0"
+        "node": ">=20.19.0"
     }
 }

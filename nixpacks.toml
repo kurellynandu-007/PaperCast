@@ -13,3 +13,6 @@ cmds = ["cd frontend && npm run build"]
 
 [start]
 cmd = "node backend/index.js"
+
+[variables]
+NODE_VERSION = "20.19.0"
