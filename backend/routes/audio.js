@@ -41,7 +41,6 @@ router.post('/', async (req, res) => {
         // Generate audio for each dialogue
         const audioPromises = allDialogues.map(async (dialogue, idx) => {
             const voiceId = dialogue.speaker.toLowerCase() === 'alex' ? alexVoiceId : samVoiceId;
-            console.log(`[DEBUG] Speaker: ${dialogue.speaker}, Resolved VoiceID: ${voiceId}`);
             return generateAudio(dialogue.text, voiceId, idx, sessionId || 'temp_session');
         });
 

@@ -8,7 +8,7 @@ import { useAppContext } from '../context/AppContext';
 
 export function Home() {
     const navigate = useNavigate();
-    const { sessionId, setSessionId, setPdfTextPreview, updateConfigField } = useAppContext();
+    const { sessionId, setSessionId, setPdfTextPreview, updateConfigField, setSourcePapers } = useAppContext();
 
     const [primaryFile, setPrimaryFile] = useState<File | null>(null);
     const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
@@ -50,8 +50,16 @@ export function Home() {
         }
     };
 
-    const handlePaperImport = (file: File, _paperTitle: string) => {
+    const handlePaperImport = (file: File, paperTitle: string, paperId?: string, paperUrl?: string) => {
         setPrimaryFile(file);
+
+        // Save source metadata to context
+        setSourcePapers([{
+            title: paperTitle,
+            id: paperId,
+            url: paperUrl
+        }]);
+
         setTimeout(() => {
             uploadCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
@@ -146,7 +154,10 @@ export function Home() {
 
                         <UploadZone
                             label="PRIMARY PAPER"
-                            onUpload={setPrimaryFile}
+                            onUpload={(f) => {
+                                setPrimaryFile(f);
+                                if (f) setSourcePapers([{ title: f.name }]);
+                            }}
                             importedFile={primaryFile}
                         />
 
@@ -172,7 +183,10 @@ export function Home() {
                                         <div className="p-4 pt-0 bg-brand-bg/50">
                                             <UploadZone
                                                 label="SECONDARY PAPER"
-                                                onUpload={setSecondaryFile}
+                                                onUpload={(f) => {
+                                                    setSecondaryFile(f);
+                                                    if (f) setSourcePapers(prev => [...prev, { title: f.name }]);
+                                                }}
                                                 isDebateMode
                                                 importedFile={secondaryFile}
                                             />

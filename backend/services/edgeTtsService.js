@@ -15,11 +15,11 @@ export async function generateAudio(text, voiceName, index, sessionId) {
     const textFilePath = path.join(dir, `${paddedIndex}.txt`);
     fs.writeFileSync(textFilePath, text, 'utf-8');
 
-    console.log(`[Edge TTS] Generating voice=${voiceName} index=${index}...`);
+    // console.log(`[Edge TTS] Generating voice=${voiceName} index=${index}...`);
 
     try {
         const cmd = `edge-tts --voice ${voiceName} -f "${textFilePath}" --write-media "${filePath}"`;
-        console.log(`Running Edge-TTS: ${cmd}`);
+        // console.log(`Running Edge-TTS: ${cmd}`);
         await execAsync(cmd);
 
         // Validate the file was actually created and has content
@@ -31,7 +31,7 @@ export async function generateAudio(text, voiceName, index, sessionId) {
         fs.unlinkSync(textFilePath);
 
         const stat = fs.statSync(filePath);
-        console.log(`[Edge TTS] Done: ${filePath} (${stat.size} bytes)`);
+        // console.log(`[Edge TTS] Done: ${filePath} (${stat.size} bytes)`);
         return filePath;
     } catch (error) {
         console.error('[Edge TTS] Failed:', error.message);

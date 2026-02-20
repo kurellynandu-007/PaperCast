@@ -27,6 +27,7 @@ interface AppState {
     audioUrl: string | null;
     selectedTransformation: Transformation;
     customTransformations: Transformation[];
+    sourcePapers: { title: string; id?: string; url?: string }[];
 }
 
 interface AppContextType extends AppState {
@@ -41,6 +42,7 @@ interface AppContextType extends AppState {
     updateCustomTransformation: (name: string, t: Transformation) => void;
     deleteCustomTransformation: (name: string) => void;
     allTransformations: Transformation[];
+    setSourcePapers: (papers: AppState['sourcePapers'] | ((prev: AppState['sourcePapers']) => AppState['sourcePapers'])) => void;
 }
 
 const defaultState: AppState = {
@@ -57,6 +59,7 @@ const defaultState: AppState = {
     audioUrl: null,
     selectedTransformation: DEFAULT_TRANSFORMATIONS[0],
     customTransformations: [],
+    sourcePapers: [],
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -69,6 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const [audioUrl, setAudioUrl] = useState<string | null>(defaultState.audioUrl);
     const [selectedTransformation, setSelectedTransformation] = useState<Transformation>(DEFAULT_TRANSFORMATIONS[0]);
     const [customTransformations, setCustomTransformations] = useState<Transformation[]>([]);
+    const [sourcePapers, setSourcePapers] = useState<AppState['sourcePapers']>(defaultState.sourcePapers);
 
     const allTransformations = [...DEFAULT_TRANSFORMATIONS, ...customTransformations];
 
@@ -112,6 +116,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setSessionId, setPdfTextPreview, setConfig, setScript, setAudioUrl,
             updateConfigField, setSelectedTransformation, addCustomTransformation,
             updateCustomTransformation, deleteCustomTransformation,
+            sourcePapers, setSourcePapers
         }}>
             {children}
         </AppContext.Provider>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Share2, Copy, Check } from 'lucide-react';
+import { Download, Share2, Copy, Check, Link as LinkIcon, ExternalLink } from 'lucide-react';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { ChapterPill } from '../components/ChapterPill';
 import { StepIndicator } from '../components/StepIndicator';
@@ -30,7 +30,7 @@ function formatTimestamp(totalSeconds: number): string {
 
 export function Listen() {
     const navigate = useNavigate();
-    const { script, audioUrl } = useAppContext();
+    const { script, audioUrl, sourcePapers } = useAppContext();
 
     const [activeDialogue, setActiveDialogue] = useState(-1);
     const [activeChapter, setActiveChapter] = useState(0);
@@ -143,7 +143,33 @@ export function Listen() {
 
             <div className="text-center mb-10">
                 <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{script.title}</h1>
-                <p className="text-brand-muted text-lg font-mono">Total Duration: {script.estimatedDuration}</p>
+                <p className="text-brand-muted text-lg font-mono mb-4">Total Duration: {script.estimatedDuration}</p>
+
+                {sourcePapers && sourcePapers.length > 0 && (
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-brand-muted uppercase tracking-widest mr-2">
+                            <LinkIcon className="w-3.5 h-3.5" /> Sources
+                        </div>
+                        {sourcePapers.map((paper, i) => (
+                            paper.url ? (
+                                <a
+                                    key={i}
+                                    href={paper.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20 hover:bg-brand-secondary/20 transition-colors"
+                                >
+                                    {paper.id ? `arXiv:${paper.id}` : (paper.title || `Paper ${i + 1}`)}
+                                    <ExternalLink className="w-3 h-3" />
+                                </a>
+                            ) : (
+                                <span key={i} className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md bg-brand-muted/10 text-brand-muted border border-brand-border">
+                                    {paper.title || `Uploaded Paper ${i + 1}`}
+                                </span>
+                            )
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="mb-12">

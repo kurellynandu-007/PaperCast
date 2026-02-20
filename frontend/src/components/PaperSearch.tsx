@@ -13,7 +13,7 @@ interface Paper {
 }
 
 interface PaperSearchProps {
-    onImport: (file: File, paperTitle: string) => void;
+    onImport: (file: File, paperTitle: string, paperId?: string, paperUrl?: string) => void;
 }
 
 function SourceBadge({ source }: { source: Paper['source'] }) {
@@ -68,7 +68,10 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
             const blob = await res.blob();
             const fileName = `${paper.title.substring(0, 60).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
             const file = new File([blob], fileName, { type: 'application/pdf' });
-            onImport(file, paper.title);
+
+            // Pass the generated File, title, and the source metadata back to parent
+            onImport(file, paper.title, paper.id, paper.pdfUrl || undefined);
+
             setImportedId(paper.id);
         } catch {
             setSearchError('Could not import this paper. Try downloading manually.');

@@ -65,7 +65,7 @@ async function searchArxiv(query, fetchFn) {
         }).filter(p => p.pdfUrl);
     } catch (err) {
         clearTimeout(timeout);
-        console.log('[arXiv] failed:', err.message);
+        // console.log('[arXiv] failed:', err.message);
         return [];
     }
 }
@@ -91,7 +91,7 @@ async function searchSemanticScholar(query, fetchFn) {
             hasFreePdf: !!p.openAccessPdf?.url,
         }));
     } catch (err) {
-        console.log('[Semantic Scholar] failed:', err.message);
+        // console.log('[Semantic Scholar] failed:', err.message);
         if (err.message === 'rate_limited') throw err;
         return [];
     }

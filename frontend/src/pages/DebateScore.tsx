@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Search, Upload, CheckCircle2, X, Loader2, BookOpen,
-    Users, Calendar, Download, Zap, FileText, AlertCircle
+    Users, Calendar, Download, Zap, FileText, AlertCircle, Link as LinkIcon, ExternalLink
 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
@@ -194,6 +194,8 @@ export function DebateScore() {
     // Files
     const [pdf1, setPdf1] = useState<File | null>(null);
     const [pdf2, setPdf2] = useState<File | null>(null);
+    const [paper1Meta, setPaper1Meta] = useState<{ id?: string, url?: string }>({});
+    const [paper2Meta, setPaper2Meta] = useState<{ id?: string, url?: string }>({});
 
     // Analysis
     const [analyzing, setAnalyzing] = useState(false);
@@ -238,7 +240,13 @@ export function DebateScore() {
             const blob = await res.blob();
             const fileName = `${paper.title.substring(0, 60).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
             const file = new File([blob], fileName, { type: 'application/pdf' });
-            if (slot === 1) setPdf1(file); else setPdf2(file);
+            if (slot === 1) {
+                setPdf1(file);
+                setPaper1Meta({ id: paper.id, url: paper.pdfUrl || undefined });
+            } else {
+                setPdf2(file);
+                setPaper2Meta({ id: paper.id, url: paper.pdfUrl || undefined });
+            }
             setImportedMap(prev => ({ ...prev, [paper.id]: slot }));
         } catch { setSearchError('Could not import this paper. Try downloading manually.'); }
         finally { setImportingId(null); }
@@ -288,8 +296,8 @@ export function DebateScore() {
             `PAPERCAST DEBATE SCORE REPORT`,
             `${'═'.repeat(60)}`,
             ``,
-            `PAPER 1: ${result.paper1Title}`,
-            `PAPER 2: ${result.paper2Title}`,
+            `PAPER 1: ${result.paper1Title} ${paper1Meta.url ? `(Source: ${paper1Meta.url})` : ''}`,
+            `PAPER 2: ${result.paper2Title} ${paper2Meta.url ? `(Source: ${paper2Meta.url})` : ''}`,
             ``,
             `OVERALL OPPOSITION SCORE: ${result.overallScore}% — ${badge.label}`,
             ``,
@@ -546,7 +554,7 @@ export function DebateScore() {
                     )}
 
                     <p className="text-center text-brand-muted text-sm">
-                        Analysis takes 15–30 seconds · <Zap className="inline w-3.5 h-3.5 text-brand-secondary" /> Powered by AI
+                        Analysis takes 15–30 seconds · <Zap className="inline w-3.5 h-3.5 text-brand-secondary" /> Powered by Groq AI
                     </p>
                 </div>
             </div>
@@ -560,9 +568,27 @@ export function DebateScore() {
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-brand-bg/30 pointer-events-none" />
 
                         <div className="flex items-center justify-center gap-4 text-sm font-semibold flex-wrap relative z-10">
-                            <span style={{ color: '#6C63FF' }}>{result.paper1Title}</span>
+                            <div className="flex flex-col items-center gap-1">
+                                <span style={{ color: '#6C63FF' }} className="text-center">{result.paper1Title}</span>
+                                {paper1Meta.url && (
+                                    <a href={paper1Meta.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-brand-muted hover:text-brand-primary transition-colors bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
+                                        <LinkIcon className="w-2.5 h-2.5" /> Source
+                                        <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
+                                    </a>
+                                )}
+                            </div>
+
                             <span className="text-brand-muted text-xs font-mono">VS</span>
-                            <span style={{ color: '#00D4AA' }}>{result.paper2Title}</span>
+
+                            <div className="flex flex-col items-center gap-1">
+                                <span style={{ color: '#00D4AA' }} className="text-center">{result.paper2Title}</span>
+                                {paper2Meta.url && (
+                                    <a href={paper2Meta.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-brand-muted hover:text-brand-secondary transition-colors bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
+                                        <LinkIcon className="w-2.5 h-2.5" /> Source
+                                        <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
+                                    </a>
+                                )}
+                            </div>
                         </div>
 
                         <div className="relative z-10">
