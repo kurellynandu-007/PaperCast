@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "scripts": {
         "start": "node backend/index.js",
-        "build": "cd frontend && npm install && npm run build"
+        "build": "cd frontend && npm install && npm run build",
+        "postinstall": "cd backend && npm install"
     },
     "engines": {
         "node": ">=20.19.0"
