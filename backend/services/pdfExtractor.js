@@ -1,5 +1,6 @@
-import _pdfParse from 'pdf-parse';
-const pdfParse = _pdfParse.default || _pdfParse;
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse/lib/pdf-parse.js');
 
 /**
  * Extracts text from a PDF buffer.
