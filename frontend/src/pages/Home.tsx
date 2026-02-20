@@ -5,11 +5,12 @@ import { Layers, Users, Headphones, ChevronDown } from 'lucide-react';
 import { UploadZone } from '../components/UploadZone';
 import { PaperSearch } from '../components/PaperSearch';
 import { useAppContext } from '../context/AppContext';
-import { apiUrl } from '../lib/api';
+import { useReferences } from '../context/ReferencesContext';
 
 export function Home() {
     const navigate = useNavigate();
     const { sessionId, setSessionId, setPdfTextPreview, updateConfigField, setSourcePapers } = useAppContext();
+    const { addReference } = useReferences();
 
     const [primaryFile, setPrimaryFile] = useState<File | null>(null);
     const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
@@ -29,7 +30,7 @@ export function Home() {
                 updateConfigField('style', 'debate'); // auto set debate mode
             }
 
-            const response = await fetch(apiUrl('/api/upload'), {
+            const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
             });
@@ -60,6 +61,18 @@ export function Home() {
             id: paperId,
             url: paperUrl
         }]);
+
+        // Track as a reference for the Listen page
+        if (paperId) {
+            addReference({
+                id: paperId,
+                title: paperTitle,
+                pdfUrl: paperUrl,
+                arxivUrl: paperUrl ? undefined : `https://arxiv.org/abs/${paperId}`,
+                source: 'arxiv',
+                usedAs: 'primary',
+            });
+        }
 
         setTimeout(() => {
             uploadCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });

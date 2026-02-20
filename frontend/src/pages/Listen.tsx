@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Share2, Copy, Check, Link as LinkIcon, ExternalLink } from 'lucide-react';
+import { Download, Share2, Copy, Check, Link as LinkIcon, ExternalLink, BookOpen } from 'lucide-react';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { ChapterPill } from '../components/ChapterPill';
 import { StepIndicator } from '../components/StepIndicator';
 import { useAppContext } from '../context/AppContext';
+import { useReferences } from '../context/ReferencesContext';
 
 // Parse "HH:MM:SS" or "MM:SS" timestamp strings into total seconds
 function parseTimestamp(ts: string): number {
@@ -31,6 +32,7 @@ function formatTimestamp(totalSeconds: number): string {
 export function Listen() {
     const navigate = useNavigate();
     const { script, audioUrl, sourcePapers } = useAppContext();
+    const { references } = useReferences();
 
     const [activeDialogue, setActiveDialogue] = useState(-1);
     const [activeChapter, setActiveChapter] = useState(0);
@@ -69,24 +71,16 @@ export function Listen() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    if (!script || !audioUrl) {
-        return (
-            <div className="min-h-screen flex items-center justify-center flex-col gap-4 text-brand-muted">
-                <h2 className="text-xl">No audio available.</h2>
-                <button onClick={() => navigate('/edit')} className="text-brand-primary hover:underline">Go back to Editor</button>
-            </div>
-        );
-    }
+    // Early return UI component, but we'll conditionally render it later so hooks run first.
 
-    // Flatten dialogues for transcript with cumulative seconds
-    const rawDialogues = script.chapters.flatMap((c, cIdx) =>
+    const rawDialogues = script ? script.chapters.flatMap((c, cIdx) =>
         c.dialogues.map((d) => ({
             ...d,
             chapterIndex: cIdx,
             isAlex: d.speaker.toLowerCase() === 'alex',
             startSeconds: parseTimestamp(d.timestamp)
         }))
-    );
+    ) : [];
 
     const allDialogues: (typeof rawDialogues[0] & { isContinuation?: boolean })[] = [];
 
@@ -116,7 +110,7 @@ export function Listen() {
         if (activeIdx >= 0) {
             setActiveChapter(allDialogues[activeIdx].chapterIndex);
         }
-    }, [currentTime]);
+    }, [currentTime, allDialogues]);
 
     // Auto-scroll active dialogue into view
     useEffect(() => {
@@ -136,6 +130,15 @@ export function Listen() {
             setCurrentTime(dialogue.startSeconds);
         }
     };
+
+    if (!script || !audioUrl) {
+        return (
+            <div className="min-h-screen flex items-center justify-center flex-col gap-4 text-brand-muted">
+                <h2 className="text-xl">No audio available.</h2>
+                <button onClick={() => navigate('/edit')} className="text-brand-primary hover:underline">Go back to Editor</button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pt-24 pb-32 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
@@ -270,6 +273,100 @@ export function Listen() {
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-brand-card/90 to-transparent z-10 pointer-events-none" />
+            </div>
+
+            {/* 📚 References Section */}
+            <div className="mt-12 mb-8">
+                <div className="mb-6">
+                    <h2 className="text-xl font-display font-bold flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-brand-primary" />
+                        📚 References
+                    </h2>
+                    <p className="text-brand-muted text-sm mt-1">Research papers used to generate this podcast</p>
+                </div>
+
+                {references.length === 0 ? (
+                    <div className="bg-brand-card/50 border border-brand-border rounded-2xl p-6 text-center">
+                        <p className="text-brand-muted text-sm">
+                            This podcast was generated from a manually uploaded PDF. No arXiv references available.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {references.map((ref, i) => {
+                            const badgeStyles = {
+                                primary: { bg: 'bg-[#6C63FF]/15', text: 'text-[#6C63FF]', border: 'border-[#6C63FF]/30', label: 'Primary Paper', leftBorder: '#6C63FF' },
+                                secondary: { bg: 'bg-[#00D4AA]/15', text: 'text-[#00D4AA]', border: 'border-[#00D4AA]/30', label: 'Second Paper', leftBorder: '#00D4AA' },
+                                debate: { bg: 'bg-orange-500/15', text: 'text-orange-400', border: 'border-orange-500/30', label: 'Debate Paper', leftBorder: '#f97316' },
+                            };
+                            const badge = badgeStyles[ref.usedAs];
+
+                            return (
+                                <div key={ref.id} className="group">
+                                    {/* Citation Card */}
+                                    <div
+                                        className="bg-[#12121A] border border-[#1E1E2E] rounded-2xl p-5 transition-all hover:border-brand-muted/30"
+                                        style={{ borderLeftWidth: 3, borderLeftColor: badge.leftBorder }}
+                                    >
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-brand-muted font-mono text-xs font-bold">[{i + 1}]</span>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badge.bg} ${badge.text} ${badge.border} border`}>
+                                                        {badge.label}
+                                                    </span>
+                                                </div>
+                                                <a
+                                                    href={ref.arxivUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-white font-semibold text-sm hover:text-brand-primary transition-colors leading-snug block mb-2"
+                                                >
+                                                    {ref.title}
+                                                </a>
+                                                {ref.authors.length > 0 && (
+                                                    <p className="text-brand-muted text-xs mb-1">
+                                                        {ref.authors.map(a => a.name).join(', ')}
+                                                    </p>
+                                                )}
+                                                {ref.year && (
+                                                    <p className="text-brand-muted text-xs font-mono">{ref.year}</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 mt-4">
+                                            <a
+                                                href={ref.arxivUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-border hover:border-brand-primary text-brand-muted hover:text-brand-primary text-xs font-medium transition-all"
+                                            >
+                                                View on arXiv <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                            {ref.pdfUrl && (
+                                                <a
+                                                    href={ref.pdfUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-border hover:border-brand-muted text-brand-muted hover:text-brand-text text-xs font-medium transition-all"
+                                                >
+                                                    <Download className="w-3 h-3" /> Download PDF
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Academic Citation Format */}
+                                    <p className="text-brand-muted/60 text-[11px] font-mono mt-2 pl-4">
+                                        [{i + 1}] {ref.authors.length > 0 ? ref.authors.map(a => a.name).join(', ') + '. ' : ''}
+                                        "{ref.title}." {ref.year ? `${ref.year}. ` : ''}arXiv:{ref.id}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             {/* Sticky Bottom Bar for Export */}

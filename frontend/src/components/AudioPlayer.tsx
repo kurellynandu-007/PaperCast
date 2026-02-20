@@ -29,7 +29,8 @@ export function AudioPlayer({ audioUrl, title, duration = "00:00", audioRef: ext
                 audioRef.current.pause();
             }
         }
-    }, [isPlaying]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isPlaying, audioRef]);
 
     const togglePlay = () => setIsPlaying(!isPlaying);
 
@@ -117,8 +118,10 @@ export function AudioPlayer({ audioUrl, title, duration = "00:00", audioRef: ext
                 ${isPlaying ? 'animate-pulse' : 'opacity-40'}
               `}
                             style={{
+                                // eslint-disable-next-line react-hooks/purity
                                 height: `${isPlaying ? Math.max(10, Math.random() * 100) : 10}%`,
                                 animationDelay: `${i * 0.05}s`,
+                                // eslint-disable-next-line react-hooks/purity
                                 opacity: isPlaying ? 0.6 + Math.random() * 0.4 : 0.3
                             }}
                         />

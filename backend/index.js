@@ -7,26 +7,9 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
-// CORS: allow local dev and production frontend URL
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:4173',
-    process.env.FRONTEND_URL,
-].filter(Boolean);
-
-app.use(cors({
-    origin: function (origin, callback) {
-        // allow requests with no origin (curl, server-to-server)
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 import uploadRoutes from './routes/upload.js';
@@ -84,7 +67,7 @@ async function searchArxiv(query, fetchFn) {
         }).filter(p => p.pdfUrl);
     } catch (err) {
         clearTimeout(timeout);
-        // console.log('[arXiv] failed:', err.message);
+
         return [];
     }
 }
@@ -110,7 +93,7 @@ async function searchSemanticScholar(query, fetchFn) {
             hasFreePdf: !!p.openAccessPdf?.url,
         }));
     } catch (err) {
-        // console.log('[Semantic Scholar] failed:', err.message);
+
         if (err.message === 'rate_limited') throw err;
         return [];
     }
@@ -141,14 +124,10 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'PaperCast API is running' });
 });
 
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
 app.get('/', (req, res) => {
-    res.send('PaperCast Backend is running.');
+    res.send('PaperCast Backend is running. Please access the web application at http://localhost:5173/');
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

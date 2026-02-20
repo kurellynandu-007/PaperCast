@@ -1,7 +1,0 @@
-node_modules/
-.env
-*.log
-backend/temp/
-backend/uploads/
-*.mp3
-*.wav

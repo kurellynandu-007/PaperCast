@@ -13,6 +13,43 @@ const LENGTH_SPECS = {
   'deep-dive': { minWords: 4000, maxWords: 5500, dialogues: '45-60', maxTokens: 8192, duration: '25-40 minutes' },
 };
 
+const FALLBACK_MODELS = [
+  'llama-3.3-70b-versatile',
+  'llama-3.1-70b-versatile',
+  'llama3-70b-8192',
+  'mixtral-8x7b-32768',
+  'llama3-8b-8192'
+];
+
+/**
+ * Invokes Groq API with a model fallback chain.
+ * @param {Array} messages - Chat messages array
+ * @param {Object} options - Additional options (temperature, max_tokens, response_format)
+ */
+export async function invokeGroqWithFallback(messages, options = {}) {
+  let lastError = null;
+  const modelsToTry = FALLBACK_MODELS;
+
+  for (const model of modelsToTry) {
+    try {
+      const response = await groq.chat.completions.create({
+        messages,
+        model,
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.max_tokens,
+        response_format: options.response_format,
+      });
+      return response;
+    } catch (error) {
+      console.warn(`[Groq fallback] Model ${model} failed: ${error.message}`);
+      lastError = error;
+    }
+  }
+
+  console.error('[Groq] All models in fallback chain failed.');
+  throw lastError;
+}
+
 export async function generateScript(pdfText, config, transformationSystemPrompt) {
   const { audience, length, focusAreas, style, introWrapup } = config;
   const spec = LENGTH_SPECS[length] || LENGTH_SPECS.medium;
@@ -62,22 +99,32 @@ REMEMBER: You MUST produce at least ${spec.minWords} words of dialogue across at
 
 Generate a COMPLETE, FULL-LENGTH podcast script following the instructions above. The script must have at least ${spec.minWords} words of dialogue.`;
 
+
+
   try {
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
+    const chatCompletion = await invokeGroqWithFallback(
+      [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'llama-3.3-70b-versatile',
-      temperature: 0.7,
-      max_tokens: spec.maxTokens,
-      response_format: { type: 'json_object' }
-    });
+      {
+        max_tokens: spec.maxTokens,
+        response_format: { type: 'json_object' }
+      }
+    );
+
 
     const responseText = chatCompletion.choices[0].message.content;
-    return JSON.parse(responseText);
+
+    // Safely parse JSON
+    try {
+      return JSON.parse(responseText);
+    } catch (parseErr) {
+      console.error('Failed to parse Groq response as JSON:', parseErr);
+      throw new Error('Groq returned malformed JSON');
+    }
   } catch (error) {
     console.error('Error generating script with Groq:', error);
-    throw new Error('Failed to generate script');
+    throw new Error('Failed to generate script: ' + error.message);
   }
 }

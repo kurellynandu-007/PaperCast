@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { UploadCloud, File, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,20 +17,21 @@ export function UploadZone({ label, onUpload, isDebateMode = false, importedFile
     // Sync externally imported file (from PaperSearch) into our local state
     useEffect(() => {
         if (importedFile) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFile(importedFile);
             setError(null);
         }
     }, [importedFile]);
 
-    const handleDragOver = useCallback((e: React.DragEvent) => {
+    const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(true);
-    }, []);
+    };
 
-    const handleDragLeave = useCallback((e: React.DragEvent) => {
+    const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
-    }, []);
+    };
 
     const validateAndSetFile = (selectedFile: File) => {
         if (selectedFile.type !== 'application/pdf') {
@@ -51,14 +52,14 @@ export function UploadZone({ label, onUpload, isDebateMode = false, importedFile
         onUpload(selectedFile);
     };
 
-    const handleDrop = useCallback((e: React.DragEvent) => {
+    const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             validateAndSetFile(e.dataTransfer.files[0]);
         }
-    }, [onUpload]);
+    };
 
     const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {

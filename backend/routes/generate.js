@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateScript } from '../services/groqService.js';
+import { generateScript, invokeGroqWithFallback } from '../services/groqService.js';
 import { supabase } from '../services/supabaseClient.js';
 
 const router = express.Router();
@@ -42,16 +42,13 @@ router.post('/playground', async (req, res) => {
     const { systemPrompt, text } = req.body;
     if (!systemPrompt || !text) return res.status(400).json({ error: 'Missing systemPrompt or text' });
     try {
-        const Groq = (await import('groq-sdk')).default;
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [
+        const chatCompletion = await invokeGroqWithFallback(
+            [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: text }
             ],
-            model: 'llama-3.3-70b-versatile',
-            temperature: 0.7
-        });
+            { temperature: 0.7 }
+        );
         res.json({ result: chatCompletion.choices[0].message.content });
     } catch (error) {
         res.status(500).json({ error: 'Playground failed: ' + error.message });

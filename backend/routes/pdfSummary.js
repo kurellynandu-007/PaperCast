@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { extractTextFromPdf } from '../services/pdfExtractor.js';
-import Groq from 'groq-sdk';
+import { invokeGroqWithFallback } from '../services/groqService.js';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -10,11 +10,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
-function getGroq() {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) throw new Error('GROQ_API_KEY is not set');
-    return new Groq({ apiKey });
-}
+
 
 function truncateWords(text, maxWords = 500) {
     const words = text.split(/\s+/).filter(Boolean);
@@ -40,9 +36,8 @@ router.post('/', upload.single('pdf'), async (req, res) => {
             return res.status(400).json({ error: 'PDF appears to contain no readable text.' });
         }
 
-        const groq = getGroq();
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [
+        const chatCompletion = await invokeGroqWithFallback(
+            [
                 {
                     role: 'system',
                     content: 'You are a research paper summarizer. Given the text of a research paper, respond with ONLY a single sentence that captures the core finding or contribution of the paper. No preamble, no extra explanation — just one clear, concise sentence.'
@@ -52,10 +47,11 @@ router.post('/', upload.single('pdf'), async (req, res) => {
                     content: truncated
                 }
             ],
-            model: 'llama-3.1-8b-instant',
-            temperature: 0.3,
-            max_tokens: 120,
-        });
+            {
+                temperature: 0.3,
+                max_tokens: 120,
+            }
+        );
 
         const summary = (chatCompletion.choices[0].message.content ?? '').trim();
         return res.json({ summary });
