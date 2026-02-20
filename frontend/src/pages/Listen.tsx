@@ -244,8 +244,8 @@ export function Listen() {
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold border-2 transition-all
                    ${(dialogue as any).isContinuation ? 'opacity-0' : ''}
                    ${dialogue.isAlex
-                                        ? state === 'active' ? 'bg-brand-primary text-white border-brand-primary' : 'bg-[#1A1A2E] text-brand-primary border-brand-border group-hover:border-brand-primary'
-                                        : state === 'active' ? 'bg-brand-secondary text-[#0A0A0F] border-brand-secondary' : 'bg-[#1A2E2A] text-brand-secondary border-brand-border group-hover:border-brand-secondary'
+                                        ? state === 'active' ? 'bg-brand-primary text-white border-brand-primary' : 'bg-brand-accent-alex text-brand-primary border-brand-border group-hover:border-brand-primary'
+                                        : state === 'active' ? 'bg-brand-secondary text-brand-bg border-brand-secondary' : 'bg-brand-accent-sam text-brand-secondary border-brand-border group-hover:border-brand-secondary'
                                     }
                  `}>
                                     {dialogue.isAlex ? 'A' : 'S'}
@@ -293,7 +293,7 @@ export function Listen() {
                         </button>
                         <button
                             onClick={handleCopyTranscript}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-brand-border hover:border-brand-text text-brand-text bg-brand-card hover:bg-[#20202A] transition-colors text-sm font-medium"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-brand-border hover:border-brand-text text-brand-text bg-brand-card hover:bg-brand-card-hover transition-colors text-sm font-medium"
                         >
                             {copied ? <Check className="w-4 h-4 text-brand-secondary" /> : <Copy className="w-4 h-4" />}
                             {copied ? 'Copied!' : 'Transcript'}

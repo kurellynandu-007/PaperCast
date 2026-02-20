@@ -18,6 +18,7 @@ import audioRoutes from './routes/audio.js';
 import fetchPdfRoutes from './routes/fetchPdf.js';
 import transformationsRoutes from './routes/transformations.js';
 import debateScoreRoutes from './routes/debateScore.js';
+import pdfSummaryRoutes from './routes/pdfSummary.js';
 
 app.use('/api/upload', uploadRoutes);
 app.use('/api/generate', generateRoutes);
@@ -25,6 +26,7 @@ app.use('/api/audio', audioRoutes);
 app.use('/api/fetch-pdf', fetchPdfRoutes);
 app.use('/api/transformations', transformationsRoutes);
 app.use('/api/debate-score', debateScoreRoutes);
+app.use('/api/pdf-summary', pdfSummaryRoutes);
 
 
 // ── Paper search: arXiv first, Semantic Scholar fallback ──────────────────────

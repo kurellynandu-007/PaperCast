@@ -1,17 +1,41 @@
 @import "tailwindcss";
 
+/* ── Dark mode (default) ── */
 @theme {
   --color-brand-bg: #0A0A0F;
   --color-brand-card: #12121A;
+  --color-brand-card-hover: #15151F;
   --color-brand-primary: #6C63FF;
+  --color-brand-primary-hover: #5b54e5;
   --color-brand-secondary: #00D4AA;
   --color-brand-text: #FFFFFF;
   --color-brand-muted: #6B7280;
   --color-brand-border: #1E1E2E;
-  
+  --color-brand-input: #12121A;
+  --color-brand-accent-alex: #1A1A2E;
+  --color-brand-accent-sam: #1A2E2A;
+
   --font-display: "Syne", sans-serif;
   --font-body: "DM Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+}
+
+/* ── Light mode overrides ──
+   Uses html[data-theme="light"] for higher specificity
+   than the :root-level @theme variables */
+html[data-theme="light"] {
+  --color-brand-bg: #F5F5FA !important;
+  --color-brand-card: #FFFFFF !important;
+  --color-brand-card-hover: #F0F0F8 !important;
+  --color-brand-primary: #6C63FF !important;
+  --color-brand-primary-hover: #5b54e5 !important;
+  --color-brand-secondary: #00B894 !important;
+  --color-brand-text: #1A1A2E !important;
+  --color-brand-muted: #6B7280 !important;
+  --color-brand-border: #E2E2EE !important;
+  --color-brand-input: #FFFFFF !important;
+  --color-brand-accent-alex: #EEEEFF !important;
+  --color-brand-accent-sam: #E6FFF8 !important;
 }
 
 @layer base {
@@ -20,19 +44,26 @@
     color: var(--color-brand-text);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 700;
   }
-  
-  code, pre {
+
+  code,
+  pre {
     font-family: var(--font-mono);
   }
 }
 
-/* Custom scrollbar for dark mode */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

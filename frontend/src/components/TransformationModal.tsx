@@ -39,7 +39,7 @@ export function TransformationModal({ transformation, onSave, onClose }: Transfo
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-            <div className="w-full max-w-2xl bg-[#12121A] border border-brand-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="w-full max-w-2xl bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-brand-border flex-shrink-0">
                     <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export function TransformationModal({ transformation, onSave, onClose }: Transfo
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-6 py-2.5 rounded-xl bg-brand-primary hover:bg-[#5b54e5] text-white text-sm font-semibold transition-all shadow-[0_0_15px_rgba(108,99,255,0.3)] hover:shadow-[0_0_20px_rgba(108,99,255,0.5)]"
+                        className="px-6 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-semibold transition-all shadow-[0_0_15px_rgba(108,99,255,0.3)] hover:shadow-[0_0_20px_rgba(108,99,255,0.5)]"
                     >
                         {isEditing ? 'Save Changes' : 'Create Transformation'}
                     </button>

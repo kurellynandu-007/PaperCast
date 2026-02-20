@@ -37,7 +37,7 @@ export function SignInModal({ onClose }: SignInModalProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
             <div
-                className="w-full max-w-md bg-[#12121A] border border-brand-border rounded-2xl shadow-2xl p-8 relative"
+                className="w-full max-w-md bg-brand-card border border-brand-border rounded-2xl shadow-2xl p-8 relative"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Close */}
@@ -65,7 +65,7 @@ export function SignInModal({ onClose }: SignInModalProps) {
                         <button
                             onClick={handleGoogle}
                             disabled={googleLoading}
-                            className="w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl border border-brand-border hover:border-brand-muted bg-brand-bg hover:bg-[#1A1A2E] transition-all text-sm font-semibold mb-5 disabled:opacity-60"
+                            className="w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl border border-brand-border hover:border-brand-muted bg-brand-bg hover:bg-brand-card-hover transition-all text-sm font-semibold mb-5 disabled:opacity-60"
                         >
                             {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4" />}
                             Continue with Google
@@ -94,7 +94,7 @@ export function SignInModal({ onClose }: SignInModalProps) {
                             <button
                                 type="submit"
                                 disabled={loading || !email.trim()}
-                                className="w-full py-3 rounded-xl bg-brand-primary hover:bg-[#5b54e5] text-white text-sm font-bold transition-all shadow-[0_0_15px_rgba(108,99,255,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full py-3 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-white text-sm font-bold transition-all shadow-[0_0_15px_rgba(108,99,255,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                                 Send Magic Link

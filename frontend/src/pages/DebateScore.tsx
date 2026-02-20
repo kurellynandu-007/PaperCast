@@ -108,9 +108,11 @@ interface UploadZoneProps {
     file: File | null;
     onFile: (f: File) => void;
     onClear: () => void;
+    summary: string | null;
+    summaryLoading: boolean;
 }
 
-function UploadZone({ label, color, file, onFile, onClear }: UploadZoneProps) {
+function UploadZone({ label, color, file, onFile, onClear, summary, summaryLoading }: UploadZoneProps) {
     const ref = useRef<HTMLInputElement>(null);
     const isDragging = useRef(false);
     const [dragging, setDragging] = useState(false);
@@ -119,6 +121,8 @@ function UploadZone({ label, color, file, onFile, onClear }: UploadZoneProps) {
     const borderCls = color === 'violet' ? 'border-[#6C63FF]/40 hover:border-[#6C63FF]' : 'border-[#00D4AA]/40 hover:border-[#00D4AA]';
     const textCls = color === 'violet' ? 'text-[#6C63FF]' : 'text-[#00D4AA]';
     const labelCls = color === 'violet' ? 'text-[#6C63FF]' : 'text-[#00D4AA]';
+
+    const showDialog = summaryLoading || !!summary;
 
     function handleDrop(e: React.DragEvent) {
         e.preventDefault();
@@ -172,6 +176,40 @@ function UploadZone({ label, color, file, onFile, onClear }: UploadZoneProps) {
                     </>
                 )}
             </div>
+
+            {/* ── Summary Dialog ─────────────────────────────────────── */}
+            <div
+                style={{
+                    opacity: showDialog ? 1 : 0,
+                    transform: showDialog ? 'translateY(0)' : 'translateY(-8px)',
+                    maxHeight: showDialog ? 120 : 0,
+                    marginTop: showDialog ? 12 : 0,
+                    padding: showDialog ? '12px 16px' : '0 16px',
+                    overflow: 'hidden',
+                    transition: 'opacity 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1), max-height 0.45s cubic-bezier(0.4,0,0.2,1), margin-top 0.4s cubic-bezier(0.4,0,0.2,1), padding 0.4s cubic-bezier(0.4,0,0.2,1)',
+                    background: 'rgba(22,22,35,0.85)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    borderRadius: 14,
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderLeft: `3px solid ${primary}`,
+                    boxShadow: `0 4px 24px rgba(0,0,0,0.3), 0 0 12px ${color === 'violet' ? 'rgba(108,99,255,0.12)' : 'rgba(0,212,170,0.12)'}`,
+                    pointerEvents: showDialog ? 'auto' : 'none',
+                }}
+            >
+                {summaryLoading ? (
+                    <div className="flex items-center gap-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" style={{ color: primary }} />
+                        <span className="text-brand-muted text-xs font-mono animate-pulse">Generating summary...</span>
+                    </div>
+                ) : summary ? (
+                    <div className="flex items-start gap-2">
+                        <FileText className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: primary }} />
+                        <p className="text-brand-text text-xs leading-relaxed">{summary}</p>
+                    </div>
+                ) : null}
+            </div>
+
             <input ref={ref} type="file" accept=".pdf,application/pdf" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
         </div>
     );
@@ -197,6 +235,12 @@ export function DebateScore() {
     const [paper1Meta, setPaper1Meta] = useState<{ id?: string, url?: string }>({});
     const [paper2Meta, setPaper2Meta] = useState<{ id?: string, url?: string }>({});
 
+    // Summaries
+    const [summary1, setSummary1] = useState<string | null>(null);
+    const [summary2, setSummary2] = useState<string | null>(null);
+    const [summaryLoading1, setSummaryLoading1] = useState(false);
+    const [summaryLoading2, setSummaryLoading2] = useState(false);
+
     // Analysis
     const [analyzing, setAnalyzing] = useState(false);
     const [loadingStep, setLoadingStep] = useState(0);
@@ -205,6 +249,47 @@ export function DebateScore() {
     const [generatingPodcast, setGeneratingPodcast] = useState(false);
 
     const resultsRef = useRef<HTMLDivElement>(null);
+
+    // ── Fetch PDF Summary ─────────────────────────────────────────────────
+
+    async function fetchSummary(file: File, slot: 1 | 2) {
+        const setLoading = slot === 1 ? setSummaryLoading1 : setSummaryLoading2;
+        const setSummary = slot === 1 ? setSummary1 : setSummary2;
+        setLoading(true);
+        setSummary(null);
+        try {
+            const form = new FormData();
+            form.append('pdf', file);
+            const res = await fetch('/api/pdf-summary', { method: 'POST', body: form });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            setSummary(data.summary || 'No summary available.');
+        } catch {
+            setSummary('Could not generate summary for this paper.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function handleFile1(f: File) {
+        setPdf1(f);
+        fetchSummary(f, 1);
+    }
+
+    function handleFile2(f: File) {
+        setPdf2(f);
+        fetchSummary(f, 2);
+    }
+
+    function clearFile1() {
+        setPdf1(null);
+        setSummary1(null);
+    }
+
+    function clearFile2() {
+        setPdf2(null);
+        setSummary2(null);
+    }
 
     // ── Search ──────────────────────────────────────────────────────────────
 
@@ -243,9 +328,11 @@ export function DebateScore() {
             if (slot === 1) {
                 setPdf1(file);
                 setPaper1Meta({ id: paper.id, url: paper.pdfUrl || undefined });
+                fetchSummary(file, 1);
             } else {
                 setPdf2(file);
                 setPaper2Meta({ id: paper.id, url: paper.pdfUrl || undefined });
+                fetchSummary(file, 2);
             }
             setImportedMap(prev => ({ ...prev, [paper.id]: slot }));
         } catch { setSearchError('Could not import this paper. Try downloading manually.'); }
@@ -389,12 +476,12 @@ export function DebateScore() {
                                 type="text" value={query}
                                 onChange={e => setQuery(e.target.value)}
                                 placeholder="Search research papers by topic..."
-                                className="w-full pl-11 pr-4 py-3.5 bg-[#12121A] border border-brand-border focus:border-[#6C63FF] rounded-xl text-brand-text placeholder-brand-muted text-sm outline-none transition-colors"
+                                className="w-full pl-11 pr-4 py-3.5 bg-brand-input border border-brand-border focus:border-brand-primary rounded-xl text-brand-text placeholder-brand-muted text-sm outline-none transition-colors"
                             />
                         </div>
                         <button
                             type="submit" disabled={searching || !query.trim()}
-                            className="px-5 py-3.5 bg-[#6C63FF] hover:bg-[#5b54e5] disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(108,99,255,0.3)] whitespace-nowrap"
+                            className="px-5 py-3.5 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(108,99,255,0.3)] whitespace-nowrap"
                         >
                             {searching ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching...</> : <><Search className="w-4 h-4" /> Search</>}
                         </button>
@@ -414,7 +501,7 @@ export function DebateScore() {
                             {papers.map(paper => {
                                 const importedSlot = importedMap[paper.id];
                                 return (
-                                    <div key={paper.id} className="bg-[#12121A] border border-[#1E1E2E] hover:border-brand-border rounded-xl p-4 transition-all flex flex-col gap-2">
+                                    <div key={paper.id} className="bg-brand-card border border-brand-border hover:border-brand-muted rounded-xl p-4 transition-all flex flex-col gap-2">
                                         <div className="flex items-start gap-2">
                                             <BookOpen className="w-3.5 h-3.5 text-[#6C63FF] flex-shrink-0 mt-0.5" />
                                             <h3 className="text-sm font-semibold text-white leading-snug line-clamp-2">{paper.title}</h3>
@@ -500,7 +587,7 @@ export function DebateScore() {
 
                 {/* Two zones + VS badge */}
                 <div className="flex flex-col sm:flex-row items-stretch gap-0 sm:gap-4">
-                    <UploadZone label="PAPER 1" color="violet" file={pdf1} onFile={setPdf1} onClear={() => setPdf1(null)} />
+                    <UploadZone label="PAPER 1" color="violet" file={pdf1} onFile={handleFile1} onClear={clearFile1} summary={summary1} summaryLoading={summaryLoading1} />
 
                     {/* VS badge */}
                     <div className="flex items-center justify-center z-10 my-(-3) sm:my-0 sm:mx-(-8)">
@@ -510,7 +597,7 @@ export function DebateScore() {
                         </div>
                     </div>
 
-                    <UploadZone label="PAPER 2" color="teal" file={pdf2} onFile={setPdf2} onClear={() => setPdf2(null)} />
+                    <UploadZone label="PAPER 2" color="teal" file={pdf2} onFile={handleFile2} onClear={clearFile2} summary={summary2} summaryLoading={summaryLoading2} />
                 </div>
 
                 {/* Analyze button */}
@@ -647,11 +734,11 @@ export function DebateScore() {
                                         <span className="text-xs font-mono font-bold text-brand-muted tracking-widest">{point.topic}</span>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 items-start">
-                                        <div className="bg-brand-card border border-[#1E1E2E] hover:border-[#6C63FF]/30 rounded-xl p-4 text-sm text-brand-text leading-relaxed transition-colors">
+                                        <div className="bg-brand-card border border-brand-border hover:border-brand-primary/30 rounded-xl p-4 text-sm text-brand-text leading-relaxed transition-colors">
                                             {point.paper1Claim}
                                         </div>
                                         <div className="flex items-center justify-center text-brand-muted font-mono text-sm py-2 sm:py-0">vs</div>
-                                        <div className="bg-brand-card border border-[#1E1E2E] hover:border-[#00D4AA]/30 rounded-xl p-4 text-sm text-brand-text leading-relaxed transition-colors">
+                                        <div className="bg-brand-card border border-brand-border hover:border-brand-secondary/30 rounded-xl p-4 text-sm text-brand-text leading-relaxed transition-colors">
                                             {point.paper2Claim}
                                         </div>
                                     </div>

@@ -145,7 +145,7 @@ export function Home() {
                                 </div>
                                 <button
                                     onClick={() => navigate('/transformations')}
-                                    className="px-4 py-2 bg-brand-primary hover:bg-[#5b54e5] transition-colors text-white rounded-lg text-sm font-medium whitespace-nowrap"
+                                    className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-hover transition-colors text-white rounded-lg text-sm font-medium whitespace-nowrap"
                                 >
                                     Resume
                                 </button>
@@ -201,7 +201,7 @@ export function Home() {
                             disabled={!primaryFile || isUploading}
                             className={`w-full py-4 rounded-xl font-medium text-lg flex items-center justify-center gap-2 transition-all duration-300
                 ${primaryFile && !isUploading
-                                    ? 'bg-brand-primary hover:bg-[#5b54e5] text-white shadow-[0_0_20px_rgba(108,99,255,0.4)]'
+                                    ? 'bg-brand-primary hover:bg-brand-primary-hover text-white shadow-[0_0_20px_rgba(108,99,255,0.4)]'
                                     : 'bg-brand-border text-brand-muted cursor-not-allowed'}`}
                         >
                             {isUploading ? (

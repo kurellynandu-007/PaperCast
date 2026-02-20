@@ -36,8 +36,8 @@ export function DialogueCard({ dialogue, onUpdate, onRegenerate, onDelete }: Dia
             <div
                 className={`relative max-w-full sm:max-w-[85%] md:max-w-[75%] rounded-2xl p-5 border-l-4 shadow-lg
           ${isAlex
-                        ? 'bg-[#1A1A2E] border-brand-primary text-left'
-                        : 'bg-[#1A2E2A] border-brand-secondary text-right'
+                        ? 'bg-brand-accent-alex border-brand-primary text-left'
+                        : 'bg-brand-accent-sam border-brand-secondary text-right'
                     }
         `}
             >

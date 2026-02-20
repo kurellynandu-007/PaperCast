@@ -201,7 +201,7 @@ export function Transformations() {
             {/* Playground Modal */}
             {playgroundOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="w-full max-w-3xl bg-[#12121A] border border-brand-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+                    <div className="w-full max-w-3xl bg-brand-card border border-brand-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between px-6 py-5 border-b border-brand-border flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <FlaskConical className="w-4 h-4 text-brand-secondary" />

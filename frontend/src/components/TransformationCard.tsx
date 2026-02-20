@@ -21,8 +21,8 @@ export function TransformationCard({ transformation, isSelected, onSelect, onEdi
         <div
             onClick={onSelect}
             className={`relative group cursor-pointer rounded-xl border p-4 transition-all duration-200 ${isSelected
-                    ? 'border-brand-primary bg-brand-primary/10 shadow-[0_0_15px_rgba(108,99,255,0.2)]'
-                    : 'border-brand-border bg-brand-bg hover:border-brand-muted hover:bg-[#15151F]'
+                ? 'border-brand-primary bg-brand-primary/10 shadow-[0_0_15px_rgba(108,99,255,0.2)]'
+                : 'border-brand-border bg-brand-bg hover:border-brand-muted hover:bg-brand-card-hover'
                 }`}
         >
             {/* Selected indicator */}

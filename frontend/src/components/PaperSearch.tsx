@@ -100,7 +100,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         placeholder="Search research papers by topic..."
-                        className="w-full pl-11 pr-10 py-3.5 bg-[#12121A] border border-brand-border focus:border-brand-primary rounded-xl text-brand-text placeholder-brand-muted text-sm outline-none transition-colors shadow-inner"
+                        className="w-full pl-11 pr-10 py-3.5 bg-brand-input border border-brand-border focus:border-brand-primary rounded-xl text-brand-text placeholder-brand-muted text-sm outline-none transition-colors shadow-inner"
                     />
                     {query && (
                         <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-text transition-colors">
@@ -111,7 +111,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
                 <button
                     type="submit"
                     disabled={isSearching || !query.trim()}
-                    className="px-5 py-3.5 bg-brand-primary hover:bg-[#5b54e5] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(108,99,255,0.3)] whitespace-nowrap"
+                    className="px-5 py-3.5 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(108,99,255,0.3)] whitespace-nowrap"
                 >
                     {isSearching ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching...</> : <><Search className="w-4 h-4" /> Search</>}
                 </button>
@@ -130,7 +130,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
                 <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
                     <p className="text-brand-muted text-xs font-mono">{papers.length} papers found</p>
                     {papers.map(paper => (
-                        <div key={paper.id} className="group bg-[#12121A] border border-[#1E1E2E] hover:border-brand-border rounded-xl p-4 transition-all duration-200 hover:bg-[#15151F]">
+                        <div key={paper.id} className="group bg-brand-card border border-brand-border hover:border-brand-muted rounded-xl p-4 transition-all duration-200 hover:bg-brand-card-hover">
                             <div className="flex items-start gap-2 mb-1.5">
                                 <BookOpen className="w-3.5 h-3.5 text-brand-primary flex-shrink-0 mt-0.5" />
                                 <h3 className="text-sm font-semibold text-white leading-snug line-clamp-2">{paper.title}</h3>

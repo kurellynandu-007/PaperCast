@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Mic, Sparkles, User, LogOut, BarChart3 } from 'lucide-react';
+import { Mic, Sparkles, User, LogOut, BarChart3, Sun, Moon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { SignInModal } from './SignInModal';
 
 export function Navbar() {
     const { user, signOut } = useAuth();
     const location = useLocation();
+    const { theme, toggleTheme } = useTheme();
     const [showSignIn, setShowSignIn] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -44,6 +46,17 @@ export function Navbar() {
                             Transformations
                         </Link>
 
+                        {/* Theme toggle */}
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2 rounded-full border border-brand-border hover:border-brand-primary text-brand-muted hover:text-brand-primary transition-all duration-300"
+                            aria-label="Toggle theme"
+                        >
+                            {theme === 'dark'
+                                ? <Sun className="w-4 h-4" />
+                                : <Moon className="w-4 h-4" />}
+                        </button>
+
                         {user ? (
                             <div className="relative">
                                 <button
@@ -58,7 +71,7 @@ export function Navbar() {
                                     <span className="text-sm font-medium text-brand-text max-w-[120px] truncate">{displayName}</span>
                                 </button>
                                 {showUserMenu && (
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#12121A] border border-brand-border rounded-xl shadow-xl overflow-hidden z-50">
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-brand-card border border-brand-border rounded-xl shadow-xl overflow-hidden z-50">
                                         <div className="px-4 py-3 border-b border-brand-border">
                                             <p className="text-xs text-brand-muted truncate">{user.email}</p>
                                         </div>

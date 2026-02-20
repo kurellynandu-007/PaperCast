@@ -129,7 +129,7 @@ export function ScriptEditor() {
                         </div>
                     </div>
 
-                    <div className="bg-[#12121A]/80 border border-brand-border rounded-xl p-5 hidden lg:block">
+                    <div className="bg-brand-card/80 border border-brand-border rounded-xl p-5 hidden lg:block">
                         <h3 className="text-xs font-bold text-brand-muted uppercase tracking-widest mb-3">Est. Outcome</h3>
                         <div className="space-y-3 font-mono text-sm">
                             <div className="flex justify-between">
