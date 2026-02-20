@@ -546,7 +546,7 @@ export function DebateScore() {
                     )}
 
                     <p className="text-center text-brand-muted text-sm">
-                        Analysis takes 15–30 seconds · <Zap className="inline w-3.5 h-3.5 text-brand-secondary" /> Powered by Gemini AI
+                        Analysis takes 15–30 seconds · <Zap className="inline w-3.5 h-3.5 text-brand-secondary" /> Powered by AI
                     </p>
                 </div>
             </div>

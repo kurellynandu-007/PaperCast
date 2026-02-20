@@ -26,26 +26,7 @@ function formatTimestamp(totalSeconds: number): string {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// Helper to split text into chunks of 2-3 sentences
-function splitIntoSentenceChunks(text: string, sentencesPerChunk: number = 3): string[] {
-    const sentences = text.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || [text];
-    const chunks: string[] = [];
-    let currentChunk = '';
-    let count = 0;
-    for (const s of sentences) {
-        currentChunk += s;
-        count++;
-        if (count >= sentencesPerChunk) {
-            chunks.push(currentChunk.trim());
-            currentChunk = '';
-            count = 0;
-        }
-    }
-    if (currentChunk.trim()) {
-        chunks.push(currentChunk.trim());
-    }
-    return chunks;
-}
+
 
 export function Listen() {
     const navigate = useNavigate();
@@ -111,37 +92,14 @@ export function Listen() {
 
     for (let i = 0; i < rawDialogues.length; i++) {
         const current = rawDialogues[i];
-        const next = i + 1 < rawDialogues.length ? rawDialogues[i + 1] : null;
-
-        // Estimate duration of this dialogue
-        let duration = 0;
-        if (next) {
-            duration = Math.max(0, next.startSeconds - current.startSeconds);
-        } else {
-            // Rough estimate: 150 words per minute ~ 2.5 words per second
-            const words = current.text.split(/\s+/).length;
-            duration = words / 2.5;
-        }
-
-        // Split text into chunks of 2-3 sentences
-        const chunks = splitIntoSentenceChunks(current.text, 2); // default to 2 sentences per chunk
-        const totalChars = Math.max(1, current.text.length); // prevent div by zero
-        let elapsedChars = 0;
-
-        for (let j = 0; j < chunks.length; j++) {
-            const chunk = chunks[j];
-            const chunkStartTime = current.startSeconds + (elapsedChars / totalChars) * duration;
-
-            allDialogues.push({
-                ...current,
-                text: chunk,
-                startSeconds: chunkStartTime,
-                timestamp: formatTimestamp(chunkStartTime),
-                isContinuation: j > 0 // optional flag if we don't want to re-render speaker pic
-            });
-
-            elapsedChars += chunk.length;
-        }
+        // We removed text chunking here to prevent any accidental drops of text 
+        // that lack standard punctuation. We now render exact AI dialogues.
+        allDialogues.push({
+            ...current,
+            startSeconds: current.startSeconds,
+            timestamp: formatTimestamp(current.startSeconds),
+            isContinuation: false
+        });
     }
 
     // Sync active dialogue based on current playback time

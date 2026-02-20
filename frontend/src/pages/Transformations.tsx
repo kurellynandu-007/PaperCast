@@ -58,7 +58,7 @@ export function Transformations() {
             {/* Header */}
             <div className="text-center mb-10">
                 <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">Choose Your Processing Style</h1>
-                <p className="text-brand-muted text-lg">Tell Gemini how to approach this paper before generating the script.</p>
+                <p className="text-brand-muted text-lg">Tell how to approach this paper before generating the script.</p>
             </div>
 
             <div className="space-y-4">

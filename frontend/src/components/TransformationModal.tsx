@@ -100,14 +100,14 @@ export function TransformationModal({ transformation, onSave, onClose }: Transfo
                         <textarea
                             value={form.systemPrompt}
                             onChange={e => setForm(f => ({ ...f, systemPrompt: e.target.value }))}
-                            placeholder="Write the prompt that tells Gemini how to approach the paper..."
+                            placeholder="Write the prompt that tells the AI how to approach the paper..."
                             rows={10}
                             className="w-full px-4 py-3 bg-brand-bg border border-brand-border focus:border-brand-primary rounded-xl text-brand-text placeholder-brand-muted text-sm outline-none transition-colors resize-none font-mono leading-relaxed"
                             style={{ fontFamily: "'JetBrains Mono', monospace" }}
                         />
                         {errors.systemPrompt && <p className="text-red-400 text-xs mt-1">{errors.systemPrompt}</p>}
                         <p className="text-brand-muted text-xs mt-1.5">
-                            Prompts should describe how Gemini should process the paper into a podcast script.
+                            Prompts should describe how the AI should process the paper into a podcast script.
                         </p>
                     </div>
                 </div>
