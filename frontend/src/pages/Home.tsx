@@ -30,7 +30,7 @@ export function Home() {
                 updateConfigField('style', 'debate'); // auto set debate mode
             }
 
-            const response = await fetch('/api/upload', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, {
                 method: 'POST',
                 body: formData,
             });

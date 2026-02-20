@@ -62,7 +62,7 @@ export function AudioLoadingScreen({ paperTitle, jobId, onAudioReady, onError, o
         // Poll for progress
         pollRef.current = setInterval(async () => {
             try {
-                const res = await fetch(`/api/audio/progress/${jobId}`);
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/audio/progress/${jobId}`);
                 if (!res.ok) {
                     // Job might not be ready yet, keep polling
                     return;
@@ -75,17 +75,18 @@ export function AudioLoadingScreen({ paperTitle, jobId, onAudioReady, onError, o
                 if (data.status === 'complete' && data.url) {
                     if (pollRef.current) clearInterval(pollRef.current);
 
-                    // Preload the audio file
-                    const audio = new Audio(data.url);
+                    // Preload the audio file using absolute backend URL
+                    const fullAudioUrl = `${import.meta.env.VITE_BACKEND_URL}${data.url}`;
+                    const audio = new Audio(fullAudioUrl);
                     audio.preload = 'auto';
 
                     audio.addEventListener('canplaythrough', () => {
-                        onAudioReady(data.url);
+                        onAudioReady(fullAudioUrl);
                     }, { once: true });
 
                     audio.addEventListener('error', () => {
                         // Even if preload fails, still navigate with the URL
-                        onAudioReady(data.url);
+                        onAudioReady(fullAudioUrl);
                     }, { once: true });
 
                     audio.load();

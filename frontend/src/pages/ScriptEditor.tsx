@@ -59,7 +59,7 @@ export function ScriptEditor() {
     const handleGenerateAudio = async () => {
         setIsGeneratingAudio(true);
         try {
-            const response = await fetch('/api/audio', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/audio`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

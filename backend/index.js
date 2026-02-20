@@ -9,7 +9,10 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+    origin: "https://paper-cast-alpha.vercel.app",
+    credentials: true
+}));
 app.use(express.json());
 
 import uploadRoutes from './routes/upload.js';

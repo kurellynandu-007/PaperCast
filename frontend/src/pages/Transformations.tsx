@@ -35,7 +35,7 @@ export function Transformations() {
         setPlaygroundRunning(true);
         setPlaygroundResult('');
         try {
-            const res = await fetch('/api/generate/playground', {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/generate/playground`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ systemPrompt: playgroundOpen.systemPrompt, text: playgroundText }),
