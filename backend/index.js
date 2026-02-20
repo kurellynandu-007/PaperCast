@@ -127,7 +127,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('PaperCast Backend is running. Please access the web application at http://localhost:5173/');
+    res.send('PaperCast Backend is running. Please access the web application at https://paper-cast-alpha.vercel.app/');
 });
 
 app.listen(PORT, () => {
