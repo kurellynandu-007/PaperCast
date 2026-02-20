@@ -40,7 +40,7 @@ Return JSON format ONLY without any markdown blocks:
   "estimatedDuration": "string"
 }`;
 
-  const userPrompt = `Paper content: ${pdfText.substring(0, 30000)}
+  const userPrompt = `Paper content: ${pdfText.substring(0, 20000)}
 
 Generate a podcast script following the instructions above.`;
 

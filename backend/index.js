@@ -123,7 +123,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('PaperCast Backend is running. Please access the web application at http://localhost:5174/');
+    res.send('PaperCast Backend is running. Please access the web application at http://localhost:5173/');
 });
 
 app.listen(PORT, () => {

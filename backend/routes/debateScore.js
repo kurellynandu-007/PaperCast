@@ -16,8 +16,8 @@ function getGroq() {
   return new Groq({ apiKey });
 }
 
-// Truncate to ~2500 words to stay well within token limits
-function truncateWords(text, maxWords = 2500) {
+// Truncate to ~1000 words to stay well within token limits (avoid Groq rate-limits)
+function truncateWords(text, maxWords = 1000) {
   const words = text.split(/\s+/).filter(Boolean);
   return words.length > maxWords ? words.slice(0, maxWords).join(' ') + '\n...[truncated]' : text;
 }
@@ -85,14 +85,14 @@ Include exactly 3 to 5 items in opposingPoints. Be accurate to the actual conten
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         temperature: 0.3,
         response_format: { type: 'json_object' }
       });
       rawText = chatCompletion.choices[0].message.content ?? '';
     } catch (groqErr) {
       console.error('[debate-score] Groq API error:', groqErr);
-      return res.status(502).json({ error: 'AI analysis service unavailable. Please try again in a moment.' });
+      return res.status(502).json({ error: 'AI analysis service unavailable: ' + (groqErr.message || "Unknown error") });
     }
 
     if (!rawText.trim()) {
