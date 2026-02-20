@@ -3,10 +3,8 @@ nixPkgs = ["ffmpeg", "python3"]
 
 [phases.install]
 cmds = [
-  "npm install",
   "cd backend && npm install",
-  "cd frontend && npm install",
-  "pip install edge-tts"
+  "cd frontend && npm install"
 ]
 
 [phases.build]
