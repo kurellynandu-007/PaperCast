@@ -18,7 +18,8 @@ export async function generateAudio(text, voiceName, index, sessionId) {
 
 
     try {
-        const cmd = `edge-tts --voice ${voiceName} -f "${textFilePath}" --write-media "${filePath}"`;
+        const edgeTtsBin = fs.existsSync('/opt/venv/bin/edge-tts') ? '/opt/venv/bin/edge-tts' : 'edge-tts';
+        const cmd = `${edgeTtsBin} --voice ${voiceName} -f "${textFilePath}" --write-media "${filePath}"`;
 
         await execAsync(cmd);
 
