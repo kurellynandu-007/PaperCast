@@ -8,7 +8,7 @@ interface Paper {
     year: number | null;
     abstract: string | null;
     pdfUrl: string | null;
-    source: 'arxiv' | 'semantic_scholar' | 'openalex';
+    source: 'arxiv' | 'semantic_scholar';
     hasFreePdf: boolean;
 }
 
@@ -18,7 +18,6 @@ interface PaperSearchProps {
 
 function SourceBadge({ source }: { source: Paper['source'] }) {
     if (source === 'arxiv') return <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/25">arXiv</span>;
-    if (source === 'openalex') return <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">OpenAlex</span>;
     return <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-brand-muted/15 text-brand-muted border border-brand-border">Semantic Scholar</span>;
 }
 

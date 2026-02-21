@@ -16,7 +16,7 @@ interface Paper {
     authors: { name: string }[];
     year: number | null;
     pdfUrl: string | null;
-    source: 'arxiv' | 'semantic_scholar' | 'openalex';
+    source: 'arxiv' | 'semantic_scholar';
     hasFreePdf: boolean;
 }
 
@@ -323,8 +323,15 @@ export function DebateScore() {
         setImportingId(`${paper.id}-${slot}`);
         try {
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`);
-            if (!res.ok) throw new Error();
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: 'Download failed' }));
+                throw new Error(err.error || 'Failed to download PDF');
+            }
             const blob = await res.blob();
+            // Validate we got actual PDF content (at least 5KB)
+            if (blob.size < 5000) {
+                throw new Error('Downloaded file is too small to be a valid PDF');
+            }
             const fileName = `${paper.title.substring(0, 60).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
             const file = new File([blob], fileName, { type: 'application/pdf' });
             if (slot === 1) {
@@ -348,7 +355,10 @@ export function DebateScore() {
                 source: paper.source,
                 usedAs: 'debate',
             });
-        } catch { setSearchError('Could not import this paper. Try downloading manually.'); }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Could not import this paper.';
+            setSearchError(`Import failed for "${paper.title.substring(0, 40)}...": ${msg}`);
+        }
         finally { setImportingId(null); }
     }
 
@@ -534,8 +544,6 @@ export function DebateScore() {
                                             )}
                                             {paper.source === 'arxiv' ? (
                                                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/25">arXiv</span>
-                                            ) : paper.source === 'openalex' ? (
-                                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">OpenAlex</span>
                                             ) : (
                                                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-brand-muted/10 text-brand-muted border border-brand-border">Semantic Scholar</span>
                                             )}

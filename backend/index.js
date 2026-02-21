@@ -32,10 +32,9 @@ app.use('/api/debate-score', debateScoreRoutes);
 app.use('/api/pdf-summary', pdfSummaryRoutes);
 
 
-// ── Paper search: BULLETPROOF – arXiv + Semantic Scholar + OpenAlex ────────────
+// ── Paper search: arXiv + Semantic Scholar (parallel, never fails) ────────────
 import { XMLParser } from 'fast-xml-parser';
 
-// ── In-memory cache (10-minute TTL) ──
 const searchCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000;
 
@@ -56,9 +55,8 @@ function setCache(key, data) {
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-// ── Rate-limit tracker for Semantic Scholar ──
 let s2LastCall = 0;
-const S2_MIN_INTERVAL = 1100; // Semantic Scholar allows ~1 req/sec
+const S2_MIN_INTERVAL = 1100;
 
 // ── SOURCE 1: arXiv ──────────────────────────────────────────────────────────
 async function searchArxiv(query) {
@@ -105,7 +103,6 @@ async function searchArxiv(query) {
 
 // ── SOURCE 2: Semantic Scholar (with retry + rate-limit respect) ──────────────
 async function searchSemanticScholar(query) {
-    // Respect rate limit
     const now = Date.now();
     const wait = S2_MIN_INTERVAL - (now - s2LastCall);
     if (wait > 0) await sleep(wait);
@@ -129,16 +126,18 @@ async function searchSemanticScholar(query) {
             if (!res.ok) return [];
             const data = await res.json();
             if (!data.data?.length) return [];
-            return data.data.map(p => ({
-                id: p.paperId,
-                title: p.title || '',
-                authors: (p.authors || []).map(a => ({ name: a.name })),
-                year: p.year || null,
-                abstract: p.abstract || '',
-                pdfUrl: p.openAccessPdf?.url || null,
-                source: 'semantic_scholar',
-                hasFreePdf: !!p.openAccessPdf?.url,
-            }));
+            return data.data
+                .filter(p => p.openAccessPdf?.url) // Only papers with downloadable PDFs
+                .map(p => ({
+                    id: p.paperId,
+                    title: p.title || '',
+                    authors: (p.authors || []).map(a => ({ name: a.name })),
+                    year: p.year || null,
+                    abstract: p.abstract || '',
+                    pdfUrl: p.openAccessPdf.url,
+                    source: 'semantic_scholar',
+                    hasFreePdf: true,
+                }));
         } catch (err) {
             console.warn(`[paper-search] S2 attempt ${attempt + 1} error:`, err.message);
             if (attempt < 2) await sleep(1000);
@@ -147,59 +146,6 @@ async function searchSemanticScholar(query) {
     return [];
 }
 
-// ── SOURCE 3: OpenAlex (FREE, no API key, no rate limits) ────────────────────
-async function searchOpenAlex(query) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    try {
-        const res = await fetch(
-            `https://api.openalex.org/works?search=${encodeURIComponent(query)}&per_page=10&select=id,title,authorships,publication_year,doi,open_access,abstract_inverted_index&mailto=contact@papercast.app`,
-            { signal: controller.signal }
-        );
-        clearTimeout(timeout);
-        if (!res.ok) return [];
-        const data = await res.json();
-        if (!data.results?.length) return [];
-        return data.results.map(w => {
-            // Reconstruct abstract from inverted index
-            let abstract = '';
-            if (w.abstract_inverted_index) {
-                const words = [];
-                for (const [word, positions] of Object.entries(w.abstract_inverted_index)) {
-                    for (const pos of positions) {
-                        words[pos] = word;
-                    }
-                }
-                abstract = words.join(' ');
-            }
-            // Extract PDF URL
-            let pdfUrl = null;
-            if (w.open_access?.oa_url) {
-                pdfUrl = w.open_access.oa_url;
-            } else if (w.doi) {
-                // Many DOI papers have arxiv versions
-                pdfUrl = null;
-            }
-            const oaId = w.id?.replace('https://openalex.org/', '') || '';
-            return {
-                id: oaId,
-                title: w.title || '',
-                authors: (w.authorships || []).slice(0, 5).map(a => ({ name: a.author?.display_name || 'Unknown' })),
-                year: w.publication_year || null,
-                abstract: abstract.substring(0, 500),
-                pdfUrl,
-                source: 'openalex',
-                hasFreePdf: !!pdfUrl,
-            };
-        }).filter(p => p.title);
-    } catch (err) {
-        console.warn('[paper-search] OpenAlex failed:', err.message);
-        clearTimeout(timeout);
-        return [];
-    }
-}
-
-// ── Deduplicate results by title similarity ──────────────────────────────────
 function deduplicatePapers(papers) {
     const seen = new Map();
     return papers.filter(p => {
@@ -210,7 +156,6 @@ function deduplicatePapers(papers) {
     });
 }
 
-// ── MAIN ENDPOINT: Never fails, always returns results or empty array ────────
 app.get('/api/paper-search', async (req, res) => {
     const { query } = req.query;
     if (!query) return res.status(400).json({ error: 'Missing query' });
@@ -222,50 +167,32 @@ app.get('/api/paper-search', async (req, res) => {
         return res.json(cached);
     }
 
-    // Run ALL sources in parallel – use whatever comes back first/best
-    const [arxivResult, s2Result, oaResult] = await Promise.allSettled([
+    // Run both sources in parallel
+    const [arxivResult, s2Result] = await Promise.allSettled([
         searchArxiv(query),
         searchSemanticScholar(query),
-        searchOpenAlex(query),
     ]);
 
     const arxivPapers = arxivResult.status === 'fulfilled' ? arxivResult.value : [];
     const s2Papers = s2Result.status === 'fulfilled' ? s2Result.value : [];
-    const oaPapers = oaResult.status === 'fulfilled' ? oaResult.value : [];
 
-    console.log(`[paper-search] Results: arXiv=${arxivPapers.length}, S2=${s2Papers.length}, OpenAlex=${oaPapers.length}`);
+    console.log(`[paper-search] Results: arXiv=${arxivPapers.length}, S2=${s2Papers.length}`);
 
-    // Priority: arXiv > Semantic Scholar > OpenAlex, but merge all for best coverage
-    let allPapers = [];
-    let source = 'none';
+    // Merge: arXiv first (always has free PDFs), then Semantic Scholar
+    let allPapers = [...arxivPapers, ...s2Papers];
+    let source = arxivPapers.length > 0 ? 'arxiv' : (s2Papers.length > 0 ? 'semantic_scholar' : 'none');
+    if (arxivPapers.length > 0 && s2Papers.length > 0) source = 'multiple';
 
-    if (arxivPapers.length > 0) {
-        allPapers = [...arxivPapers];
-        source = 'arxiv';
-    }
-    if (s2Papers.length > 0) {
-        allPapers = [...allPapers, ...s2Papers];
-        source = allPapers.length > arxivPapers.length ? 'multiple' : source;
-    }
-    if (oaPapers.length > 0) {
-        allPapers = [...allPapers, ...oaPapers];
-        if (source === 'none') source = 'openalex';
-    }
-
-    // Deduplicate and limit to 10
     allPapers = deduplicatePapers(allPapers).slice(0, 10);
 
     const result = { papers: allPapers, source };
 
-    // Cache even empty results for 2 minutes to prevent hammering
     if (allPapers.length > 0) {
         setCache(cacheKey, result);
     } else {
-        // Short cache for empty results
         searchCache.set(cacheKey, { data: result, ts: Date.now() - (CACHE_TTL - 2 * 60 * 1000) });
     }
 
-    // NEVER return an error status – always 200 with papers array (may be empty)
     return res.json(result);
 });
 
