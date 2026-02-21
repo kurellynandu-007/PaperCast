@@ -2,10 +2,14 @@
 nixPkgs = ["ffmpeg", "python3"]
 
 [phases.install]
-cmds = ["npm install", "pip install edge-tts"]
+cmds = [
+    "npm install",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install edge-tts"
+]
 
 [start]
-cmd = "node index.js"
+cmd = "PATH=\"/opt/venv/bin:$PATH\" node index.js"
 
 [variables]
 NODE_VERSION = "20.19.0"

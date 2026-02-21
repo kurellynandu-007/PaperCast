@@ -19,9 +19,12 @@ router.get('/', async (req, res) => {
     }
 
     try {
+        const fetch = (await import('node-fetch')).default;
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (PaperCast; research tool)'
+                // arXiv sometimes blocks custom user agents, standard browser UA works best
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/pdf'
             },
             follow: 10
         });
@@ -35,9 +38,10 @@ router.get('/', async (req, res) => {
         res.set('Content-Disposition', 'inline; filename="paper.pdf"');
 
         // Stream binary PDF data back to the client
-        response.body.pipe(res);
+        const buffer = await response.arrayBuffer();
+        res.send(Buffer.from(buffer));
     } catch (error) {
-        console.error('[fetch-pdf proxy] Error:', error);
+        console.error('[fetch-pdf proxy] Error:', error.message, error.stack);
         res.status(500).json({ error: 'Failed to fetch PDF' });
     }
 });
