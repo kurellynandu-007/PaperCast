@@ -16,7 +16,7 @@ interface Paper {
     authors: { name: string }[];
     year: number | null;
     pdfUrl: string | null;
-    source: 'arxiv' | 'semantic_scholar';
+    source: 'arxiv' | 'semantic_scholar' | 'openalex';
     hasFreePdf: boolean;
 }
 
@@ -309,12 +309,12 @@ export function DebateScore() {
             }
             const data: { papers: Paper[] } = await res.json();
             if (!data.papers?.length) {
-                setSearchError('We have no articles about that topic right now. Try different keywords.');
+                setSearchError('No papers found for this query. Try different keywords or a broader topic.');
             } else {
                 setPapers(data.papers);
             }
         } catch (e) {
-            setSearchError(e instanceof Error ? e.message : 'Search failed. Check your internet connection and try again.');
+            setSearchError('Search temporarily unavailable. Please try again in a moment.');
         } finally { setSearching(false); }
     }
 
@@ -534,6 +534,8 @@ export function DebateScore() {
                                             )}
                                             {paper.source === 'arxiv' ? (
                                                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/25">arXiv</span>
+                                            ) : paper.source === 'openalex' ? (
+                                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">OpenAlex</span>
                                             ) : (
                                                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-brand-muted/10 text-brand-muted border border-brand-border">Semantic Scholar</span>
                                             )}
