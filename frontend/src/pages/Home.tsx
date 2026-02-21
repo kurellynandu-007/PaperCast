@@ -30,7 +30,7 @@ export function Home() {
                 updateConfigField('style', 'debate'); // auto set debate mode
             }
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/upload`, {
                 method: 'POST',
                 body: formData,
             });

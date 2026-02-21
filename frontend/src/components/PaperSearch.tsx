@@ -41,7 +41,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
         setPapers([]);
         setImportedId(null);
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/paper-search?query=${encodeURIComponent(query.trim())}`);
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/paper-search?query=${encodeURIComponent(query.trim())}`);
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'Search failed');
@@ -63,7 +63,7 @@ export function PaperSearch({ onImport }: PaperSearchProps) {
         if (!paper.pdfUrl) return;
         setImportingId(paper.id);
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`);
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`);
             if (!res.ok) throw new Error('Failed to fetch PDF');
             const blob = await res.blob();
             const fileName = `${paper.title.substring(0, 60).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;

@@ -262,7 +262,7 @@ export function DebateScore() {
         try {
             const form = new FormData();
             form.append('pdf', file);
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/pdf-summary`, { method: 'POST', body: form });
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/pdf-summary`, { method: 'POST', body: form });
             if (!res.ok) throw new Error();
             const data = await res.json();
             setSummary(data.summary || 'No summary available.');
@@ -302,7 +302,7 @@ export function DebateScore() {
         setSearchError(null);
         setPapers([]);
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/paper-search?query=${encodeURIComponent(query.trim())}`);
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/paper-search?query=${encodeURIComponent(query.trim())}`);
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'Search failed');
@@ -322,7 +322,7 @@ export function DebateScore() {
         if (!paper.pdfUrl) return;
         setImportingId(`${paper.id}-${slot}`);
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`);
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/fetch-pdf?url=${encodeURIComponent(paper.pdfUrl)}`);
             if (!res.ok) throw new Error();
             const blob = await res.blob();
             const fileName = `${paper.title.substring(0, 60).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
@@ -369,7 +369,7 @@ export function DebateScore() {
             const form = new FormData();
             form.append('pdf1', pdf1);
             form.append('pdf2', pdf2);
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/debate-score`, { method: 'POST', body: form });
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/debate-score`, { method: 'POST', body: form });
             let data: DebateResult & { error?: string };
             try {
                 data = await res.json();
@@ -435,7 +435,7 @@ export function DebateScore() {
             form.append('file', pdf1);
             form.append('file2', pdf2);
 
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, { method: 'POST', body: form });
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/upload`, { method: 'POST', body: form });
             if (!res.ok) throw new Error('Failed to prepare files for podcast generation.');
 
             const data = await res.json();

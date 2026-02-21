@@ -62,7 +62,7 @@ export function AudioLoadingScreen({ paperTitle, jobId, onAudioReady, onError, o
         // Poll for progress
         pollRef.current = setInterval(async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/audio/progress/${jobId}`);
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}/api/audio/progress/${jobId}`);
                 if (!res.ok) {
                     // Job might not be ready yet, keep polling
                     return;
@@ -76,7 +76,7 @@ export function AudioLoadingScreen({ paperTitle, jobId, onAudioReady, onError, o
                     if (pollRef.current) clearInterval(pollRef.current);
 
                     // Preload the audio file using absolute backend URL
-                    const fullAudioUrl = `${import.meta.env.VITE_BACKEND_URL}${data.url}`;
+                    const fullAudioUrl = `${import.meta.env.VITE_BACKEND_URL || 'https://papercast-production.up.railway.app'}${data.url}`;
                     const audio = new Audio(fullAudioUrl);
                     audio.preload = 'auto';
 
